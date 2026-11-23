@@ -14,3 +14,8 @@ INSERT INTO salones (salon_id, codigo_salon, edificio, capacidad) VALUES
   (2, 'B-204', 'Ingenierías', 25),
   (3, 'C-310', 'Ciencias Básicas', 60),
   (4, 'L-002', 'Laboratorios', 18);
+INSERT INTO salones (salon_id, codigo_salon, edificio, capacidad) VALUES
+  (1, 'A-101', 'Edificio Central', 40),
+  (2, 'B-204', 'Ingenierías', 25),
+  (3, 'C-310', 'Ciencias Básicas', 60),
+  (4, 'L-002', 'Laboratorios', 18);
