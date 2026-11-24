@@ -1,7 +1,6 @@
 {
   "info": {
     "name": "ms-cursos",
-    "description": "Evaluación Módulo 3 · Redes y Servicios Multimedia (UAO). Login y un caso por cada código de respuesta de ms-cursos. El token del login se copia y se pega en la variable token (y el de flota en token_flota). Para correrla por el gateway, cambie las variables base y login.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -14,9 +13,34 @@
       }
     ]
   },
+  "variable": [
+    {
+      "key": "base",
+      "value": "http://127.0.0.1:3011"
+    },
+    {
+      "key": "login",
+      "value": "http://127.0.0.1:3001/usuarios/login"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
   "item": [
     {
       "name": "00 Login administrador - 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('token', pm.response.json().token);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -28,12 +52,7 @@
         "url": "{{login}}",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"admin@empresa.com\",\n  \"password\": \"Admin2026*\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
+          "raw": "{\n  \"email\": \"admin@empresa.com\",\n  \"password\": \"Admin2026*\"\n}"
         },
         "auth": {
           "type": "noauth"
@@ -41,7 +60,18 @@
       }
     },
     {
-      "name": "01 Login flota - 200",
+      "name": "01 POST /cursos salon_id 1 - 201 con salon",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Responde 201', () => pm.response.to.have.status(201));",
+              "pm.test('Trae el objeto salon', () => pm.expect(pm.response.json().salon).to.be.an('object'));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -50,58 +80,107 @@
             "value": "application/json"
           }
         ],
-        "url": "{{login}}",
+        "url": "{{base}}/cursos",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"flota@empresa.com\",\n  \"password\": \"CLAVE-DE-FLOTA\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
+          "raw": "{\n  \"codigo\": \"EXM-{{$randomInt}}\",\n  \"nombre\": \"Curso examen M3\",\n  \"creditos\": 3,\n  \"cupo\": 30,\n  \"semestre\": \"2026-2\",\n  \"salon_id\": 1\n}"
+        }
+      }
+    },
+    {
+      "name": "02 POST /cursos salon_id 99 - 400 no existe",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Responde 400', () => pm.response.to.have.status(400));"
+            ]
           }
-        },
-        "auth": {
-          "type": "noauth"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base}}/cursos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigo\": \"EXM-{{$randomInt}}\",\n  \"nombre\": \"Curso examen M3\",\n  \"creditos\": 3,\n  \"cupo\": 30,\n  \"semestre\": \"2026-2\",\n  \"salon_id\": 99\n}"
         }
       }
     },
     {
-      "name": "02 Health - 200",
+      "name": "03 POST /cursos salon_id 2 - 400 regla de negocio",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Responde 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
       "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{base}}/health",
-        "auth": {
-          "type": "noauth"
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base}}/cursos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigo\": \"EXM-{{$randomInt}}\",\n  \"nombre\": \"Curso examen M3\",\n  \"creditos\": 3,\n  \"cupo\": 30,\n  \"semestre\": \"2026-2\",\n  \"salon_id\": 2\n}"
         }
       }
     },
     {
-      "name": "03 Listar cursos - 200",
+      "name": "04 PUT /cursos/1 salon_id 2 - 400 regla al actualizar",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Responde 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
       "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{base}}/cursos"
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base}}/cursos/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigo\": \"RED-301\",\n  \"nombre\": \"Redes y Servicios Multimedia\",\n  \"creditos\": 3,\n  \"cupo\": 30,\n  \"semestre\": \"2026-2\",\n  \"salon_id\": 2\n}"
+        }
       }
     },
     {
-      "name": "04 Filtrar por semestre - 200",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{base}}/cursos?semestre=2026-2"
-      }
-    },
-    {
-      "name": "05 Filtro con formato invalido - 400",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{base}}/cursos?semestre=2026-5"
-      }
-    },
-    {
-      "name": "06 Obtener curso por id - 200",
+      "name": "05 GET /cursos/1 - 200 con salon",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('Trae el objeto salon', () => pm.expect(pm.response.json().salon).to.be.an('object'));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
@@ -109,7 +188,55 @@
       }
     },
     {
-      "name": "07 Crear curso - 201",
+      "name": "06 GET /cursos - 200 (una peticion ?ids= en ms-salones)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('Devuelve un arreglo', () => pm.expect(pm.response.json()).to.be.an('array'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base}}/cursos"
+      }
+    },
+    {
+      "name": "07 ms-salones APAGADO GET /cursos - 200 salon null y aviso",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('salon null y aviso', () => { const c = pm.response.json()[0]; pm.expect(c.salon).to.equal(null); pm.expect(c.aviso).to.be.a('string'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base}}/cursos"
+      }
+    },
+    {
+      "name": "08 ms-salones APAGADO POST /cursos - 503",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Responde 503', () => pm.response.to.have.status(503));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -121,253 +248,9 @@
         "url": "{{base}}/cursos",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"codigo\": \"ELE-110\",\n  \"nombre\": \"Electrónica Básica\",\n  \"creditos\": 3,\n  \"cupo\": 20,\n  \"semestre\": \"2026-2\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
+          "raw": "{\n  \"codigo\": \"EXM-{{$randomInt}}\",\n  \"nombre\": \"Curso examen M3\",\n  \"creditos\": 3,\n  \"cupo\": 30,\n  \"semestre\": \"2026-2\",\n  \"salon_id\": 1\n}"
         }
       }
-    },
-    {
-      "name": "08 Crear con codigo repetido - 409",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{base}}/cursos",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"codigo\": \"ELE-110\",\n  \"nombre\": \"Electrónica Básica\",\n  \"creditos\": 3,\n  \"cupo\": 20,\n  \"semestre\": \"2026-2\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      }
-    },
-    {
-      "name": "09 Crear con datos invalidos - 400",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{base}}/cursos",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"codigo\": \"\",\n  \"nombre\": \"Curso con errores\",\n  \"creditos\": 9,\n  \"cupo\": 0,\n  \"semestre\": \"2026-3\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      }
-    },
-    {
-      "name": "10 Obtener curso inexistente - 404",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{base}}/cursos/99999"
-      }
-    },
-    {
-      "name": "11 Obtener con id no numerico - 400",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{base}}/cursos/abc"
-      }
-    },
-    {
-      "name": "12 Actualizar curso - 200",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{base}}/cursos/4",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"codigo\": \"PRO-101\",\n  \"nombre\": \"Programación Básica\",\n  \"creditos\": 3,\n  \"cupo\": 30,\n  \"semestre\": \"2026-1\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      }
-    },
-    {
-      "name": "13 Actualizar con el codigo de otro curso - 409",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{base}}/cursos/4",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"codigo\": \"RED-301\",\n  \"nombre\": \"Programación Básica\",\n  \"creditos\": 3,\n  \"cupo\": 30,\n  \"semestre\": \"2026-1\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      }
-    },
-    {
-      "name": "14 Actualizar curso inexistente - 404",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{base}}/cursos/99999",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"codigo\": \"NOE-999\",\n  \"nombre\": \"No existe\",\n  \"creditos\": 3,\n  \"cupo\": 20,\n  \"semestre\": \"2026-2\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      }
-    },
-    {
-      "name": "15 Listar sin token - 401",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{base}}/cursos",
-        "auth": {
-          "type": "noauth"
-        }
-      }
-    },
-    {
-      "name": "16 Listar con token alterado - 401",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{base}}/cursos",
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "token-alterado-123",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "17 Listar con rol flota - 200",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{base}}/cursos",
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{token_flota}}",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "18 Crear con rol flota - 403",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{base}}/cursos",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"codigo\": \"PRB-403\",\n  \"nombre\": \"Prueba 403\",\n  \"creditos\": 2,\n  \"cupo\": 10,\n  \"semestre\": \"2026-2\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{token_flota}}",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "19 Eliminar curso - 204",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": "{{base}}/cursos/4"
-      }
-    },
-    {
-      "name": "20 Eliminar curso ya eliminado - 404",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": "{{base}}/cursos/4"
-      }
-    }
-  ],
-  "variable": [
-    {
-      "key": "base",
-      "value": "http://localhost:3011"
-    },
-    {
-      "key": "login",
-      "value": "http://localhost:3001/usuarios/login"
-    },
-    {
-      "key": "token",
-      "value": ""
-    },
-    {
-      "key": "token_flota",
-      "value": ""
     }
   ]
 }

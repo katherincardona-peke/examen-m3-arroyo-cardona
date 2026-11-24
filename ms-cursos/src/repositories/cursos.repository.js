@@ -8,11 +8,11 @@ async function findAll(filtros = {}) {
   let sql = 'SELECT * FROM cursos';
   const condiciones = [];
   const valores = [];
-  if (filtros.semestre) {                  // ?semestre=2026-2 → WHERE semestre = '2026-2'
+  if (filtros.semestre) {
     condiciones.push('semestre = ?');
     valores.push(filtros.semestre);
   }
-  if (filtros.ids) {                       // ?ids=1,2,3 → WHERE id IN (1, 2, 3)
+  if (filtros.ids) {
     condiciones.push('id IN (?)');
     valores.push(filtros.ids);
   }
@@ -33,15 +33,15 @@ async function findByCodigo(codigo) {
 
 async function create(curso) {
   const [resultado] = await pool.query(
-    'INSERT INTO cursos (codigo, nombre, creditos, cupo, semestre) VALUES (?, ?, ?, ?, ?)',
-    [curso.codigo, curso.nombre, curso.creditos, curso.cupo, curso.semestre]);
+    'INSERT INTO cursos (codigo, nombre, creditos, cupo, semestre, salon_id) VALUES (?, ?, ?, ?, ?, ?)',
+    [curso.codigo, curso.nombre, curso.creditos, curso.cupo, curso.semestre, curso.salon_id]);
   return findById(resultado.insertId);
 }
 
 async function update(id, curso) {
   const [resultado] = await pool.query(
-    'UPDATE cursos SET codigo = ?, nombre = ?, creditos = ?, cupo = ?, semestre = ? WHERE id = ?',
-    [curso.codigo, curso.nombre, curso.creditos, curso.cupo, curso.semestre, id]);
+    'UPDATE cursos SET codigo = ?, nombre = ?, creditos = ?, cupo = ?, semestre = ?, salon_id = ? WHERE id = ?',
+    [curso.codigo, curso.nombre, curso.creditos, curso.cupo, curso.semestre, curso.salon_id, id]);
   if (resultado.affectedRows === 0) return null;
   return findById(id);
 }

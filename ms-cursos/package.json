@@ -1,7 +1,7 @@
 {
   "name": "ms-cursos",
   "version": "1.0.0",
-  "description": "Microservicio de cursos - Evaluación Módulo 3, Redes y Servicios Multimedia (UAO)",
+  "description": "Microservicio de cursos - examen Módulo 3, Redes y Servicios Multimedia (consume ms-salones)",
   "main": "src/index.js",
   "scripts": {
     "start": "node --env-file-if-exists=.env src/index.js",

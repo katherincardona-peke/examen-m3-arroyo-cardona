@@ -1,6 +1,7 @@
 // =====================================================================
 // CAPA DE PRESENTACIÓN (controlador)
-// Traduce HTTP <-> servicio: lee la petición y arma la respuesta.
+// Traduce HTTP <-> servicio. Reenvía al servicio el token del usuario
+// (cabecera Authorization) para que lo use al consultar ms-salones.
 // =====================================================================
 const service = require('../services/cursos.service');
 const { SEMESTRE_VALIDO } = require('../models/curso');
@@ -27,23 +28,23 @@ async function listar(req, res) {
       throw new HttpError(400, 'ids debe ser una lista de enteros separados por comas');
     }
   }
-  res.status(200).json(await service.listar(filtros));
+  res.status(200).json(await service.listar(filtros, req.headers.authorization));
 }
 
 // GET /cursos/:id
 async function obtener(req, res) {
-  res.status(200).json(await service.obtener(leerId(req)));
+  res.status(200).json(await service.obtener(leerId(req), req.headers.authorization));
 }
 
 // POST /cursos
 async function crear(req, res) {
-  const nuevo = await service.crear(req.body);
+  const nuevo = await service.crear(req.body, req.headers.authorization);
   res.status(201).location(`${req.baseUrl}/${nuevo.id}`).json(nuevo);
 }
 
 // PUT /cursos/:id
 async function actualizar(req, res) {
-  res.status(200).json(await service.actualizar(leerId(req), req.body));
+  res.status(200).json(await service.actualizar(leerId(req), req.body, req.headers.authorization));
 }
 
 // DELETE /cursos/:id

@@ -1,7 +1,6 @@
 // =====================================================================
 // CAPA DE MODELO (entidad)
 // Define qué campos tiene un Curso y qué reglas deben cumplir.
-// No sabe nada de HTTP ni de bases de datos.
 // =====================================================================
 
 // Semestre: cuatro dígitos, un guion y 1 o 2. Ejemplos: 2026-1, 2026-2
@@ -17,12 +16,8 @@ function validarCurso(datos) {
   if (!datos || typeof datos !== 'object') {
     return ['Se esperaba un objeto JSON con los datos del curso'];
   }
-  if (!textoValido(datos.codigo)) {
-    errores.push('codigo es obligatorio');
-  }
-  if (!textoValido(datos.nombre)) {
-    errores.push('nombre es obligatorio');
-  }
+  if (!textoValido(datos.codigo)) errores.push('codigo es obligatorio');
+  if (!textoValido(datos.nombre)) errores.push('nombre es obligatorio');
   if (!Number.isInteger(datos.creditos) || datos.creditos < 1 || datos.creditos > 6) {
     errores.push('creditos debe ser un entero entre 1 y 6');
   }
@@ -31,6 +26,10 @@ function validarCurso(datos) {
   }
   if (typeof datos.semestre !== 'string' || !SEMESTRE_VALIDO.test(datos.semestre.trim())) {
     errores.push('semestre debe tener el formato AAAA-1 o AAAA-2');
+  }
+  // Atributo de referencia (ficha 02): id del salón en ms-salones
+  if (!Number.isInteger(datos.salon_id) || datos.salon_id <= 0) {
+    errores.push('salon_id es obligatorio y debe ser un entero positivo');
   }
   return errores;
 }
@@ -43,6 +42,7 @@ function construirCurso(datos) {
     creditos: datos.creditos,
     cupo: datos.cupo,
     semestre: datos.semestre.trim(),
+    salon_id: datos.salon_id,
   };
 }
 
